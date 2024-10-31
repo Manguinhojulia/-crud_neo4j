@@ -2,16 +2,15 @@ import os
 from neo4j import GraphDatabase
 from dotenv import load_dotenv
 
-
-# Carregar variáveis de ambiente do arquivo .env
+# Carregar as configurações do arquivo .env
 load_dotenv()
 
-# Parâmetros de conexão (carregados do .env)
+# Configurações de conexão (obtidas do .env)
 uri = os.getenv("NEO4J_URI")
 username = os.getenv("NEO4J_USERNAME")
 password = os.getenv("NEO4J_PASSWORD")
 
-# Função para conectar ao banco de dados Neo4j
+# Método para estabelecer conexão com o banco de dados Neo4j
 def connect_to_neo4j(uri, username, password):
     try:
         driver = GraphDatabase.driver(uri, auth=(username, password))
@@ -21,13 +20,12 @@ def connect_to_neo4j(uri, username, password):
         print("Erro ao conectar ao Neo4j:", e)
         return None
 
-# Função para criar uma pessoa no banco de dados
+# Método para adicionar uma pessoa ao banco de dados
 def create_person(session, name, age):
     session.run("CREATE (p:Person {name: $name, age: $age})", name=name, age=age)
     print(f"Pessoa {name} criada com sucesso.")
 
-
-# Função para listar todas as pessoas no banco de dados
+# Método para listar todas as pessoas armazenadas
 def list_people(session):
     result = session.run("MATCH (p:Person) RETURN p.name AS name, p.age AS age")
     people = result.values()
@@ -38,7 +36,7 @@ def list_people(session):
     else:
         print("Nenhuma pessoa encontrada.")
 
-# Função para buscar uma pessoa específica
+# Método para buscar uma pessoa específica
 def read_person(session, name):
     result = session.run("MATCH (p:Person {name: $name}) RETURN p.name AS name, p.age AS age", name=name)
     person = result.single()
@@ -47,7 +45,7 @@ def read_person(session, name):
     else:
         print("Pessoa não encontrada.")
 
-# Função para atualizar a idade de uma pessoa
+# Método para modificar a idade de uma pessoa
 def update_person_age(session, name, new_age):
     result = session.run("MATCH (p:Person {name: $name}) SET p.age = $new_age RETURN p", name=name, new_age=new_age)
     if result.single():
@@ -55,7 +53,7 @@ def update_person_age(session, name, new_age):
     else:
         print("Pessoa não encontrada para atualização.")
 
-# Função para deletar uma pessoa
+# Método para remover uma pessoa
 def delete_person(session, name):
     result = session.run("MATCH (p:Person {name: $name}) DELETE p RETURN COUNT(p) AS count", name=name)
     if result.single()["count"] > 0:
@@ -63,7 +61,7 @@ def delete_person(session, name):
     else:
         print("Pessoa não encontrada para deletar.")
 
-# Função para criar relacionamento de amizade entre duas pessoas
+# Método para criar um vínculo de amizade entre duas pessoas
 def create_friendship(session, name1, name2):
     result = session.run(
         """
@@ -77,12 +75,12 @@ def create_friendship(session, name1, name2):
     else:
         print("Uma ou ambas as pessoas não foram encontradas para criar o relacionamento.")
 
-# Função para deletar todas as pessoas
+# Método para remover todas as pessoas
 def delete_all_people(session):
     session.run("MATCH (p:Person) DETACH DELETE p")
     print("Todas as pessoas foram deletadas com sucesso.")
 
-# Função para mostrar o menu e capturar a escolha do usuário
+# Método para exibir o menu e capturar a escolha do usuário
 def show_menu():
     print("\nEscolha uma opção:")
     print("1. Adicionar nova pessoa")
@@ -95,8 +93,7 @@ def show_menu():
     print("8. Sair")
     return input("Digite o número da opção: ")
 
-
-# Tentar conectar ao banco de dados
+# Tentar estabelecer conexão com o banco de dados
 session = connect_to_neo4j(uri, username, password)
 
 # Executar operações de CRUD com interação no terminal
@@ -149,3 +146,4 @@ if session:
     session.close()  # Fechar a sessão quando terminar
 else:
     print("Não foi possível estabelecer conexão com o Neo4j.")
+
